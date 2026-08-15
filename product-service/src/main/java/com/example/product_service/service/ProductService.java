@@ -1,7 +1,10 @@
 package com.example.product_service.service;
 
+import com.example.product_service.dto.ProductRequest;
+import com.example.product_service.dto.ProductResponse;
 import com.example.product_service.entity.Product;
 import com.example.product_service.repository.ProductRepository;
+
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -15,35 +18,70 @@ public class ProductService {
         this.productRepository = productRepository;
     }
 
-    public Product createProduct(Product product) {
-        return productRepository.save(product);
+    public ProductResponse createProduct(ProductRequest request) {
+
+        Product product = new Product();
+
+        product.setName(request.getName());
+        product.setPrice(request.getPrice());
+        product.setQuantity(request.getQuantity());
+
+        Product savedProduct = productRepository.save(product);
+
+        return convertToResponse(savedProduct);
     }
 
-    public List<Product> getAllProducts() {
-        return productRepository.findAll();
+    public List<ProductResponse> getAllProducts() {
+
+        return productRepository.findAll()
+                .stream()
+                .map(this::convertToResponse)
+                .toList();
     }
 
-    public Product getProductById(Long id) {
-        return productRepository.findById(id)
+    public ProductResponse getProductById(Long id) {
+
+        Product product = productRepository.findById(id)
                 .orElseThrow(() ->
                         new RuntimeException("Product not found"));
+
+        return convertToResponse(product);
     }
 
-    public Product updateProduct(Long id, Product product) {
+    public ProductResponse updateProduct(
+            Long id,
+            ProductRequest request) {
 
-        Product existingProduct = getProductById(id);
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Product not found"));
 
-        existingProduct.setName(product.getName());
-        existingProduct.setPrice(product.getPrice());
-        existingProduct.setQuantity(product.getQuantity());
+        existingProduct.setName(request.getName());
+        existingProduct.setPrice(request.getPrice());
+        existingProduct.setQuantity(request.getQuantity());
 
-        return productRepository.save(existingProduct);
+        Product updatedProduct =
+                productRepository.save(existingProduct);
+
+        return convertToResponse(updatedProduct);
     }
 
     public void deleteProduct(Long id) {
 
-        Product existingProduct = getProductById(id);
+        Product existingProduct = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new RuntimeException("Product not found"));
 
         productRepository.delete(existingProduct);
+    }
+
+    private ProductResponse convertToResponse(Product product) {
+
+        return new ProductResponse(
+                product.getId(),
+                product.getName(),
+                product.getPrice(),
+                product.getQuantity()
+        );
     }
 }
