@@ -3,6 +3,7 @@ package com.example.product_service.service;
 import com.example.product_service.dto.ProductRequest;
 import com.example.product_service.dto.ProductResponse;
 import com.example.product_service.entity.Product;
+import com.example.product_service.exception.ProductNotFoundException;
 import com.example.product_service.repository.ProductRepository;
 
 import org.springframework.stereotype.Service;
@@ -43,8 +44,10 @@ public class ProductService {
 
         Product product = productRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Product not found"));
-
+                        new ProductNotFoundException(
+                                "Product not found with id: " + id
+                        )
+                );
         return convertToResponse(product);
     }
 
@@ -54,8 +57,10 @@ public class ProductService {
 
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Product not found"));
-
+                        new ProductNotFoundException(
+                                "Product not found with id: " + id
+                        )
+                );
         existingProduct.setName(request.getName());
         existingProduct.setPrice(request.getPrice());
         existingProduct.setQuantity(request.getQuantity());
@@ -70,8 +75,10 @@ public class ProductService {
 
         Product existingProduct = productRepository.findById(id)
                 .orElseThrow(() ->
-                        new RuntimeException("Product not found"));
-
+                        new ProductNotFoundException(
+                                "Product not found with id: " + id
+                        )
+                );
         productRepository.delete(existingProduct);
     }
 
