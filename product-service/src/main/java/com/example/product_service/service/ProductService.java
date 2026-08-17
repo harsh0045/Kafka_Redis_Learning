@@ -8,6 +8,7 @@ import com.example.product_service.exception.ProductNotFoundException;
 import com.example.product_service.repository.ProductRepository;
 
 import com.example.product_service.specification.ProductSpecification;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -72,8 +73,9 @@ public class ProductService {
                 .findAll(specification, pageable)
                 .map(this::convertToResponse);
     }
+    @Cacheable(value = "products", key = "#id")
     public ProductResponse getProductById(Long id) {
-
+        System.out.println("========== DATABASE CALL ==========");
         Product product = productRepository.findById(id)
                 .orElseThrow(() ->
                         new ProductNotFoundException(

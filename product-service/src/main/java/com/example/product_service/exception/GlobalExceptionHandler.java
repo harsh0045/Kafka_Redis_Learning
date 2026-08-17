@@ -63,12 +63,13 @@ public class GlobalExceptionHandler {
      * 500 - Unexpected Exception
      */
     @ExceptionHandler(Exception.class)
-    public ResponseEntity<ErrorResponse> handleGenericException(
-            Exception ex) {
+    public ResponseEntity<ErrorResponse> handleGlobalException(Exception ex) {
+
+        ex.printStackTrace();
 
         ErrorResponse errorResponse = new ErrorResponse(
-                HttpStatus.INTERNAL_SERVER_ERROR.value(),
-                "Something went wrong",
+                500,
+                ex.getMessage(),
                 LocalDateTime.now()
         );
 
