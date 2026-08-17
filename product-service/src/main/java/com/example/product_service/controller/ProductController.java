@@ -26,6 +26,17 @@ public class ProductController {
 
         return productService.createProduct(request);
     }
+    
+    @PostMapping("/{id}/purchase")
+    public ProductResponse purchaseProduct(
+            @PathVariable Long id,
+            @RequestParam Integer quantity) {
+
+        return productService.purchaseProduct(
+                id,
+                quantity
+        );
+    }
 
     @GetMapping
     public Page<ProductResponse> getAllProducts(

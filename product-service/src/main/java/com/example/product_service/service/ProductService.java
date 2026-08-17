@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ProductService {
@@ -113,6 +114,34 @@ public class ProductService {
                 );
 
         productRepository.delete(existingProduct);
+    }
+
+    @Transactional
+    public ProductResponse purchaseProduct(
+            Long id,
+            Integer quantity) {
+
+        Product product = productRepository.findById(id)
+                .orElseThrow(() ->
+                        new ProductNotFoundException(
+                                "Product not found with id: " + id
+                        )
+                );
+
+        if (product.getQuantity() < quantity) {
+            throw new RuntimeException(
+                    "Not enough stock available"
+            );
+        }
+
+        product.setQuantity(
+                product.getQuantity() - quantity
+        );
+
+        Product updatedProduct =
+                productRepository.save(product);
+
+        return convertToResponse(updatedProduct);
     }
 
     private ProductResponse convertToResponse(Product product) {
