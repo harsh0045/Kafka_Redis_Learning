@@ -6,8 +6,10 @@ import com.example.product_service.entity.Product;
 import com.example.product_service.exception.ProductNotFoundException;
 import com.example.product_service.repository.ProductRepository;
 
+import com.example.product_service.specification.ProductSpecification;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -33,12 +35,41 @@ public class ProductService {
     }
 
     // Pagination + Sorting
-    public Page<ProductResponse> getAllProducts(Pageable pageable) {
+    public Page<ProductResponse> getAllProducts(
+            String name,
+            Double minPrice,
+            Double maxPrice,
+            Pageable pageable) {
 
-        return productRepository.findAll(pageable)
+        Specification<Product> specification =
+                (root, query, criteriaBuilder) ->
+                        criteriaBuilder.conjunction();
+
+        if (name != null && !name.isBlank()) {
+
+            specification = specification.and(
+                    ProductSpecification.nameContains(name)
+            );
+        }
+
+        if (minPrice != null) {
+
+            specification = specification.and(
+                    ProductSpecification.priceGreaterThanOrEqual(minPrice)
+            );
+        }
+
+        if (maxPrice != null) {
+
+            specification = specification.and(
+                    ProductSpecification.priceLessThanOrEqual(maxPrice)
+            );
+        }
+
+        return productRepository
+                .findAll(specification, pageable)
                 .map(this::convertToResponse);
     }
-
     public ProductResponse getProductById(Long id) {
 
         Product product = productRepository.findById(id)

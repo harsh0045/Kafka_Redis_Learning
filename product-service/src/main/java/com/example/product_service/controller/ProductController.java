@@ -29,9 +29,24 @@ public class ProductController {
 
     @GetMapping
     public Page<ProductResponse> getAllProducts(
+
+            @RequestParam(required = false)
+            String name,
+
+            @RequestParam(required = false)
+            Double minPrice,
+
+            @RequestParam(required = false)
+            Double maxPrice,
+
             Pageable pageable) {
 
-        return productService.getAllProducts(pageable);
+        return productService.getAllProducts(
+                name,
+                minPrice,
+                maxPrice,
+                pageable
+        );
     }
 
     @GetMapping("/{id}")
