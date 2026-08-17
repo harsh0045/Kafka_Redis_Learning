@@ -1,17 +1,14 @@
 package com.example.product_service.controller;
 
-import com.example.product_service.service.ProductService;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import com.example.product_service.dto.ProductRequest;
 import com.example.product_service.dto.ProductResponse;
-
+import com.example.product_service.service.ProductService;
 
 import jakarta.validation.Valid;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.web.bind.annotation.*;
-
 
 @RestController
 @RequestMapping("/api/products")
@@ -31,8 +28,10 @@ public class ProductController {
     }
 
     @GetMapping
-    public List<ProductResponse> getAllProducts() {
-        return productService.getAllProducts();
+    public Page<ProductResponse> getAllProducts(
+            Pageable pageable) {
+
+        return productService.getAllProducts(pageable);
     }
 
     @GetMapping("/{id}")

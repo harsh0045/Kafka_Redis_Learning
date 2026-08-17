@@ -6,9 +6,9 @@ import com.example.product_service.entity.Product;
 import com.example.product_service.exception.ProductNotFoundException;
 import com.example.product_service.repository.ProductRepository;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-
-import java.util.List;
 
 @Service
 public class ProductService {
@@ -32,12 +32,11 @@ public class ProductService {
         return convertToResponse(savedProduct);
     }
 
-    public List<ProductResponse> getAllProducts() {
+    // Pagination + Sorting
+    public Page<ProductResponse> getAllProducts(Pageable pageable) {
 
-        return productRepository.findAll()
-                .stream()
-                .map(this::convertToResponse)
-                .toList();
+        return productRepository.findAll(pageable)
+                .map(this::convertToResponse);
     }
 
     public ProductResponse getProductById(Long id) {
@@ -48,6 +47,7 @@ public class ProductService {
                                 "Product not found with id: " + id
                         )
                 );
+
         return convertToResponse(product);
     }
 
@@ -61,6 +61,7 @@ public class ProductService {
                                 "Product not found with id: " + id
                         )
                 );
+
         existingProduct.setName(request.getName());
         existingProduct.setPrice(request.getPrice());
         existingProduct.setQuantity(request.getQuantity());
@@ -79,6 +80,7 @@ public class ProductService {
                                 "Product not found with id: " + id
                         )
                 );
+
         productRepository.delete(existingProduct);
     }
 
