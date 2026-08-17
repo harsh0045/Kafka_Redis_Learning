@@ -3,6 +3,7 @@ package com.example.product_service.service;
 import com.example.product_service.dto.ProductRequest;
 import com.example.product_service.dto.ProductResponse;
 import com.example.product_service.entity.Product;
+import com.example.product_service.exception.InsufficientStockException;
 import com.example.product_service.exception.ProductNotFoundException;
 import com.example.product_service.repository.ProductRepository;
 
@@ -116,6 +117,7 @@ public class ProductService {
         productRepository.delete(existingProduct);
     }
 
+
     @Transactional
     public ProductResponse purchaseProduct(
             Long id,
@@ -129,8 +131,12 @@ public class ProductService {
                 );
 
         if (product.getQuantity() < quantity) {
-            throw new RuntimeException(
-                    "Not enough stock available"
+
+            throw new InsufficientStockException(
+                    "Not enough stock available. Available: "
+                            + product.getQuantity()
+                            + ", Requested: "
+                            + quantity
             );
         }
 

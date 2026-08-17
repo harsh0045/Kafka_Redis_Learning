@@ -26,7 +26,7 @@ public class ProductController {
 
         return productService.createProduct(request);
     }
-    
+
     @PostMapping("/{id}/purchase")
     public ProductResponse purchaseProduct(
             @PathVariable Long id,
