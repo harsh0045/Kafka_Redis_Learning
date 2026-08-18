@@ -5,6 +5,8 @@ import com.example.product_service.dto.ProductResponse;
 import com.example.product_service.entity.Product;
 import com.example.product_service.exception.InsufficientStockException;
 import com.example.product_service.exception.ProductNotFoundException;
+import com.example.product_service.kafka.ProductCreatedEvent;
+import com.example.product_service.kafka.ProductEventProducer;
 import com.example.product_service.repository.ProductRepository;
 
 import com.example.product_service.specification.ProductSpecification;
@@ -21,9 +23,10 @@ import org.springframework.transaction.annotation.Transactional;
 public class ProductService {
 
     private final ProductRepository productRepository;
-
-    public ProductService(ProductRepository productRepository) {
+    private final ProductEventProducer productEventProducer;
+    public ProductService(ProductRepository productRepository,ProductEventProducer productEventProducer) {
         this.productRepository = productRepository;
+        this.productEventProducer=productEventProducer;
     }
 
     public ProductResponse createProduct(ProductRequest request) {
@@ -35,6 +38,16 @@ public class ProductService {
         product.setQuantity(request.getQuantity());
 
         Product savedProduct = productRepository.save(product);
+
+        ProductCreatedEvent event =
+                new ProductCreatedEvent(
+                        savedProduct.getId(),
+                        savedProduct.getName(),
+                        savedProduct.getPrice(),
+                        savedProduct.getQuantity()
+                );
+
+        productEventProducer.sendProductCreatedEvent(event);
 
         return convertToResponse(savedProduct);
     }
@@ -124,7 +137,7 @@ public class ProductService {
         productRepository.delete(existingProduct);
     }
 
-    
+
     @CachePut(value = "products", key = "#id")
     @Transactional
     public ProductResponse purchaseProduct(
