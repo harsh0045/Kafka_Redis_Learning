@@ -8,6 +8,8 @@ import com.example.product_service.exception.ProductNotFoundException;
 import com.example.product_service.repository.ProductRepository;
 
 import com.example.product_service.specification.ProductSpecification;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.CachePut;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -75,7 +77,9 @@ public class ProductService {
     }
     @Cacheable(value = "products", key = "#id")
     public ProductResponse getProductById(Long id) {
+
         System.out.println("========== DATABASE CALL ==========");
+
         Product product = productRepository.findById(id)
                 .orElseThrow(() ->
                         new ProductNotFoundException(
@@ -86,6 +90,7 @@ public class ProductService {
         return convertToResponse(product);
     }
 
+    @CachePut(value = "products", key = "#id")
     public ProductResponse updateProduct(
             Long id,
             ProductRequest request) {
@@ -106,7 +111,7 @@ public class ProductService {
 
         return convertToResponse(updatedProduct);
     }
-
+    @CacheEvict(value = "products", key = "#id")
     public void deleteProduct(Long id) {
 
         Product existingProduct = productRepository.findById(id)
@@ -119,7 +124,8 @@ public class ProductService {
         productRepository.delete(existingProduct);
     }
 
-
+    
+    @CachePut(value = "products", key = "#id")
     @Transactional
     public ProductResponse purchaseProduct(
             Long id,
